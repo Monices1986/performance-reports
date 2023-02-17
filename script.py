@@ -2,15 +2,18 @@
 import requests
 import json
 import csv
+import os
 
 
 def run():
     print_welcome()
     website_url = read_user_input()
+    csv_file_name = prepare_csv_file()
     for strategy in strategies:
         strategy_specific_url = build_full_url(website_url, strategy)
         performance_report = query_performance(strategy_specific_url)
-        create_report(performance_report)
+        create_report(performance_report, csv_file_name)
+    print("Collecting data is finished - check core web vitals in .csv file")
 
 
 def print_welcome():
@@ -18,7 +21,22 @@ def print_welcome():
 
 
 def read_user_input():
-    return input('enter website URL: ')
+    return input('enter website URL (http://...): ')
+
+
+def prepare_csv_file():
+    file_name = "results.csv"
+    with open("results.csv", "a", newline='') as file:
+
+        if file_is_empty(file_name):
+            headers = ['lighthouse fetchTime', 'form factor', 'overall score', 'speed_index', 'first_contentful_pain',
+                       'first_meaningful_paint', 'time_to_interactive']
+            csv.writer(file).writerow(headers)
+    return file_name
+
+
+def file_is_empty(path):
+    return os.stat(path).st_size == 0
 
 
 def build_full_url(website_url, strategy):
@@ -33,11 +51,8 @@ def query_performance(strategy_specific_url):
     return response
 
 
-def create_report(report):
-    with open("results.csv", "a", newline='') as file:
-        headers = ['lighthouse fetchTime', 'form factor', 'overall score', 'speed_index', 'first_contentful_pain',
-                   'first_meaningful_paint', 'time_to_interactive']
-
+def create_report(report, file_name):
+    with open(file_name, "a") as file:
         rows = [report['lighthouseResult']['fetchTime'],
                 report['lighthouseResult']['configSettings']['formFactor'],
                 report["lighthouseResult"]["categories"]["performance"]["score"] * 100,
@@ -46,19 +61,7 @@ def create_report(report):
                 report["lighthouseResult"]["audits"]["first-meaningful-paint"]["score"] * 100,
                 report["lighthouseResult"]["audits"]["interactive"]["score"] * 100]
 
-        csv_writer = csv.writer(file)
-
-        with open('results.csv', 'rt') as f:
-            reader = csv.reader(f, delimiter=',')
-            for row in reader:
-                if headers == row[0]:
-                    csv_writer.writerow(headers)
-                    csv_writer.writerow(rows)
-                else:
-                    csv_writer.writerow(rows)
-
-        csv_writer.writerow(headers)
-        csv_writer.writerow(rows)
+        csv.writer(file).writerow(rows)
 
 
 if __name__ == '__main__':
