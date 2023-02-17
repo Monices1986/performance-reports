@@ -8,7 +8,7 @@ import os
 def run():
     print_welcome()
     website_url = read_user_input()
-    csv_file_name = prepare_csv_file()
+    csv_file_name = prepare_csv_file(website_url)
     for strategy in strategies:
         strategy_specific_url = build_full_url(website_url, strategy)
         performance_report = query_performance(strategy_specific_url)
@@ -21,13 +21,12 @@ def print_welcome():
 
 
 def read_user_input():
-    return input('enter website URL (http://...): ')
+    return input('enter website URL (www.dental21.de): ')
 
 
-def prepare_csv_file():
-    file_name = "results.csv"
-    with open("results.csv", "a", newline='') as file:
-
+def prepare_csv_file(website_url):
+    file_name = 'performance_report_' + website_url + '.csv'
+    with open(file_name, "a") as file:
         if file_is_empty(file_name):
             headers = ['lighthouse fetchTime', 'form factor', 'overall score', 'speed_index', 'first_contentful_pain',
                        'first_meaningful_paint', 'time_to_interactive']
@@ -65,6 +64,6 @@ def create_report(report, file_name):
 
 
 if __name__ == '__main__':
-    pagespeed_base_url = 'https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url='
+    pagespeed_base_url = 'https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=http://'
     strategies = ["mobile", "desktop"]
     run()
