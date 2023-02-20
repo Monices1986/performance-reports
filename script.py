@@ -3,11 +3,12 @@ import requests
 import json
 import csv
 import os
+import sys
 
 
 def run():
     print_welcome()
-    website_url = read_user_input()
+    website_url = get_url_from_terminal()
     csv_file_name = prepare_csv_file(website_url)
     for strategy in strategies:
         strategy_specific_url = build_full_url(website_url, strategy)
@@ -17,11 +18,15 @@ def run():
 
 
 def print_welcome():
-    print('Check performance results by providing website URL')
+    print('Check performance results by providing <website_url> like this: www.dental21.de in your terminal')
 
 
-def read_user_input():
-    return input('enter website URL (www.dental21.de): ')
+def get_url_from_terminal():
+    if len(sys.argv) < 2:
+        print("Usage: python3 script.py <website_url>")
+        exit(1)
+    else:
+        return sys.argv[1]
 
 
 def prepare_csv_file(website_url):
